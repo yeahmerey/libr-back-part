@@ -24,7 +24,7 @@ async def register(user_data: SUserRegister):
 
 @router.post("/login")
 async def login(response: Response, user_data: SUserAuth):
-    user = await authenticate_user(user_data.email, user_data.password)
+    user = await authenticate_user(user_data.username, user_data.password)
     if not user:
         raise HTTPException(status_code=401)
 
