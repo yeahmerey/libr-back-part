@@ -7,3 +7,5 @@ class SUserAuth(BaseModel):
 
 class SUserRegister(SUserAuth):
     username: str
+    email: EmailStr
+    password : str;
