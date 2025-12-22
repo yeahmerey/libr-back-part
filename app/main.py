@@ -12,6 +12,7 @@ from app.db.models import *
 from app.api.routes.follow import router as follow_router
 from app.db.db_config import engine , Base
 from app.api.routes.admin import router as admin_router
+from app.api.routes.content import router as content_router
 # from fastapi_cache import FastAPICache
 # from fastapi_cache.backends.redis import RedisBackend
 # from fastapi_cache.decoratot import cache
@@ -51,3 +52,4 @@ app.include_router(image_router)
 app.include_router(ai_router)
 app.include_router(follow_router)
 app.include_router(admin_router)
+app.include_router(content_router)

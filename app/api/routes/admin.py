@@ -1,13 +1,36 @@
 # app/api/routes/admin.py
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException , Body
 from sqlalchemy import select
 from app.api.dependenies import get_current_admin  # ← твой исправленный путь
+from app.db.models.content import Content
 from app.db.models.user import User
 from app.db.db_config import async_session_maker
 from app.schemas.user import SUserPublic  # уже есть
 from app.schemas.user_auth import SUserRegister
 from app.services.auth import get_password_hash
+from app.schemas.content import ContentCreate , ContentUpdate , ContentResponse
+from pydantic import BaseModel
+from typing import Literal , Optional
+
 router = APIRouter(prefix="/admin", tags=["Admin"])
+
+class SContentCreate(BaseModel):
+    type: Literal["book", "movie"]
+    name: str
+    description: Optional[str] = None
+    image_url: Optional[str] = None
+
+class SContentUpdate(SContentCreate):
+    pass
+
+class SContentResponse(SContentCreate):
+    id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
 
 @router.get("/users", response_model=list[SUserPublic])
 async def get_all_users(admin: User = Depends(get_current_admin)):
@@ -97,3 +120,38 @@ async def update_username(
         user.username = new_username
         await session.commit()
         return {"id": user_id, "username": new_username}
+
+@router.post("/content", response_model=ContentResponse)
+async def create_content(data: SContentCreate, admin: User = Depends(get_current_admin)):
+    async with async_session_maker() as session:
+        new = Content(**data.model_dump())
+        session.add(new)
+        await session.commit()
+        await session.refresh(new)
+        return new
+
+@router.put("/content/{content_id}", response_model=SContentResponse)
+async def update_content(
+    content_id: int,
+    data: SContentUpdate,
+    admin: User = Depends(get_current_admin)
+):
+    async with async_session_maker() as session:
+        item = await session.get(Content, content_id)
+        if not item:
+            raise HTTPException(404, "Content not found")
+        for k, v in data.model_dump().items():
+            setattr(item, k, v)
+        await session.commit()
+        await session.refresh(item)
+        return item
+
+@router.delete("/content/{content_id}")
+async def delete_content(content_id: int, admin: User = Depends(get_current_admin)):
+    async with async_session_maker() as session:
+        item = await session.get(Content, content_id)
+        if not item:
+            raise HTTPException(404, "Content not found")
+        await session.delete(item)
+        await session.commit()
+        return {"message": "Deleted"}
