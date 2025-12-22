@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, Boolean, String, DateTime
 from sqlalchemy.orm import relationship
 
 from app.db.db_config import Base
@@ -18,3 +18,4 @@ class User(Base):
     location = Column(String(100))
     year_of_birth = Column(Integer)
     created_at = Column(DateTime, default=datetime.now)
+    is_admin = Column(Boolean , default=False , nullable=False)

@@ -11,6 +11,7 @@ from app.api.routes.ai import router as ai_router
 from app.db.models import *
 from app.api.routes.follow import router as follow_router
 from app.db.db_config import engine , Base
+from app.api.routes.admin import router as admin_router
 # from fastapi_cache import FastAPICache
 # from fastapi_cache.backends.redis import RedisBackend
 # from fastapi_cache.decoratot import cache
@@ -49,3 +50,4 @@ app.include_router(likecomment_router)
 app.include_router(image_router)
 app.include_router(ai_router)
 app.include_router(follow_router)
+app.include_router(admin_router)

@@ -13,6 +13,7 @@ class SUser(BaseModel):
 
 class SUserPublic(SUser):
     id: int
+    is_admin : bool
     created_at: datetime
 
     class Config:
