@@ -37,8 +37,8 @@ class UserDAO(BaseDAO):
         async with async_session_maker() as session:
             query = select(Post).where(Post.user_id == user_id).order_by(desc(Post.created_at))
             result = await session.execute(query)
-            posts = result.scalars().all()
-            return posts
+            return result.scalars().all()
+            
 
     @classmethod
     async def add_user_image(cls, image_url: str, user_id: int):
