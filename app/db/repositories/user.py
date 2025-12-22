@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import select , desc
 
 from app.db.db_config import async_session_maker
 from app.db.models.likepost import LikePost
@@ -35,7 +35,7 @@ class UserDAO(BaseDAO):
     @classmethod
     async def get_user_posts(cls, user_id: int):
         async with async_session_maker() as session:
-            query = select(Post).where(Post.user_id == user_id)
+            query = select(Post).where(Post.user_id == user_id).order_by(desc(Post.created_at))
             result = await session.execute(query)
             posts = result.scalars().all()
             return posts
