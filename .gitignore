@@ -3,3 +3,4 @@
 alembic.ini
 .idea
 __pycache__/
+static
