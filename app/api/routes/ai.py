@@ -9,6 +9,7 @@ from app.db.models.chat_message import ChatMessage
 from app.db.db_config import async_session_maker
 router = APIRouter(prefix="/ai", tags=["AI"])
 
+
 @router.post("/chat")
 async def chat_with_gemini(
     message: str = Body(..., embed=True),
@@ -31,7 +32,14 @@ async def chat_with_gemini(
     API_KEY = settings.GEMINI_API_KEY
     url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
     params = {"key": API_KEY}
-    contents = history + [{"role": "user", "parts": [{"text": message}]}]
+    guided_message = (
+    "You are an expert in books and movies. "
+    "Only answer questions about literature and films. "
+    "If the topic is unrelated, politely say you only discuss books and movies. "
+    "Now respond to this: " + message
+    )
+
+    contents = history + [{"role": "user", "parts": [{"text": guided_message}]}]
     payload = {"contents": contents}
 
     async with httpx.AsyncClient() as client:
