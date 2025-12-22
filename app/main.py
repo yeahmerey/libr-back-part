@@ -9,6 +9,7 @@ from app.api.routes.likecomment import router as likecomment_router
 from app.api.routes.image import router as image_router
 from app.api.routes.ai import router as ai_router
 from app.db.models import *
+from app.api.routes.follow import router as follow_router
 from app.db.db_config import engine , Base
 # from fastapi_cache import FastAPICache
 # from fastapi_cache.backends.redis import RedisBackend
@@ -47,3 +48,4 @@ app.include_router(likepost_router)
 app.include_router(likecomment_router)
 app.include_router(image_router)
 app.include_router(ai_router)
+app.include_router(follow_router)
