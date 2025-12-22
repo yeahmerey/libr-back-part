@@ -15,4 +15,6 @@ class User(Base):
     password = Column(String(255), nullable=False)
     image_url = Column(String(255), unique=True)
     bio = Column(String(255))
+    location = Column(String(100))
+    year_of_birth = Column(Integer)
     created_at = Column(DateTime, default=datetime.now)

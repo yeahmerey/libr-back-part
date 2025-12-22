@@ -8,6 +8,8 @@ class SUser(BaseModel):
     username: str
     bio: Optional[str] = None
     image_url: Optional[str] = None
+    location: Optional[str] = None
+    year_of_birth: Optional[int] = None
 
 class SUserPublic(SUser):
     id: int

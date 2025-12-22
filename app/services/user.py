@@ -16,7 +16,11 @@ class UserService:
 
     @classmethod
     async def update(cls, user_id: int, updated_user: SUser):
-        return await UserDAO.update(id=user_id, username=updated_user.username, bio=updated_user.bio)
+        update_data = updated_user.model_dump(exclude_unset=True)
+        protected_fields = {"id", "email"}
+        update_data = {k : v for k, v in update_data.items() if k not in protected_fields}
+
+        return await UserDAO.update(id=user_id,**update_data)
 
     @classmethod
     async def get_users(cls, query: str) -> list[SUserPublic]:
