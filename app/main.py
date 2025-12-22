@@ -7,7 +7,9 @@ from app.api.routes.post import router as post_router
 from app.api.routes.likepost import router as likepost_router
 from app.api.routes.likecomment import router as likecomment_router
 from app.api.routes.image import router as image_router
-
+from app.api.routes.ai import router as ai_router
+from app.db.models import *
+from app.db.db_config import engine , Base
 # from fastapi_cache import FastAPICache
 # from fastapi_cache.backends.redis import RedisBackend
 # from fastapi_cache.decoratot import cache
@@ -15,11 +17,17 @@ from app.api.routes.image import router as image_router
 # from redis import asyncio as aioredis
 
 
-app = FastAPI()
+app = FastAPI(title="Libr AI Backend")
+
+@app.on_event("startup")
+async def startup():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3000","http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -38,3 +46,4 @@ app.include_router(post_router)
 app.include_router(likepost_router)
 app.include_router(likecomment_router)
 app.include_router(image_router)
+app.include_router(ai_router)

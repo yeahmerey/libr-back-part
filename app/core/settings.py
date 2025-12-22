@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     REFRESH_KEY: str
     ALGORITHM: str
-
+    GEMINI_API_KEY : str
     class Config:
         env_file = ".env"
 
