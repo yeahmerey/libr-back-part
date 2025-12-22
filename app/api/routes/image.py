@@ -1,8 +1,7 @@
 from fastapi import APIRouter, UploadFile, Depends
-
-from app.api.routes.user import get_current_user
+from app.api.dependenies import get_current_user  # ← убедись, что "dependencies", а не "dependenies"
 from app.db.models.user import User
-from app.services.user import UserService
+from app.services.user import UserService  # ← правильно
 
 router = APIRouter(
     prefix="/images",

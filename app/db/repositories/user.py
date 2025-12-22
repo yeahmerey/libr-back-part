@@ -48,3 +48,4 @@ class UserDAO(BaseDAO):
                 raise HTTPException(status_code=404, detail="User not found")
             user.image_url = image_url
             await session.commit()
+            return user

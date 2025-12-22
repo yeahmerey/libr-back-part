@@ -35,16 +35,22 @@ class UserService:
         return await UserDAO.get_user_posts(user_id=user_id)
 
     @classmethod
+    @classmethod  # ← ОБЯЗАТЕЛЬНО @classmethod
     async def add_user_image(cls, file: UploadFile, user_id: int):
-        if not file.content_type.startswith('image'):
-            raise HTTPException(status_code=404, detail="Image not supported")
+        if not file.content_type.startswith("image/"):
+            raise HTTPException(status_code=400, detail="Only image files are allowed")
 
-        extension = file.filename.split('.')[-1]
+        extension = file.filename.split(".")[-1]
         unique_name = f"{uuid.uuid4().hex}.{extension}"
-        file_path = os.path.join("app/static/images", unique_name)
+        file_path = os.path.join("app", "static", "images", unique_name)
 
-        async with aiofiles.open(file_path, 'wb') as file_object:
+        # Создаём папку, если её нет
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+        async with aiofiles.open(file_path, "wb") as f:
             content = await file.read()
-            await file_object.write(content)
+            await f.write(content)
 
-        return await UserDAO.add_user_image(file_path, user_id=user_id)
+        # 🔥 Сохраняем ОТНОСИТЕЛЬНЫЙ путь для фронтенда
+        image_url = f"/static/images/{unique_name}"
+        return await UserDAO.add_user_image(image_url=image_url, user_id=user_id)
