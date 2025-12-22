@@ -17,7 +17,7 @@ router = APIRouter(
 async def get_posts():
     return await PostServices.get_all_posts()
 
-@router.post("")
+@router.post("", response_model=SPostResponse)
 async def create_post(content: str = Form(...), file: Union[UploadFile, str] = File(None), user: User = Depends(get_current_user)):
     from app.schemas.post import SPost
     post = SPost(content=content)
@@ -31,10 +31,18 @@ async def search_posts(query: str = Query(..., min_length=1, max_length=50)):
 async def get_post_by_id(id: int):
     return PostServices.get_post(post_id=id)
 
-@router.put("/{id}")
-async def update_post(updated_post: SPost, id: int, user: User = Depends(get_current_user)):
-    return await PostServices.edit_post(post=updated_post, post_id=id, user_id=user.id)
+# app/api/routes/post.py
 
+@router.put("/{id}", response_model=SPostResponse)
+async def update_post(
+    id: int,
+    content: str = Form(...),
+    file: UploadFile = File(None),
+    user: User = Depends(get_current_user)
+):
+    from app.schemas.post import SPost
+    post = SPost(content=content)
+    return await PostServices.edit_post(post=post, post_id=id, user_id=user.id, file=file)
 @router.delete("/{id}")
 async def delete_post(id: int, user: User = Depends(get_current_user)):
     return await PostServices.delete_post(post_id=id, user_id=user.id)

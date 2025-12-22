@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select , insert , update
 
 from app.db.db_config import async_session_maker
 from app.db.models.comment import Comment
@@ -9,6 +9,15 @@ from app.schemas.post import SPostResponse
 
 class PostDAO(BaseDAO):
     model = Post
+    @classmethod
+    async def add(cls, **data):
+        async with async_session_maker() as session:
+            # Вставляем и получаем возвращённую строку
+            stmt = insert(cls.model).values(**data).returning(cls.model)
+            result = await session.execute(stmt)
+            await session.commit()
+            new_obj = result.scalar()
+            return new_obj
 
     @classmethod
     async def get_post_comments(cls, post_id: int):
@@ -25,3 +34,10 @@ class PostDAO(BaseDAO):
             result = await session.execute(query)
             posts = result.scalars().all()
             return posts
+    @classmethod
+    async def update(cls, id: int, **data):
+        async with async_session_maker() as session:
+            stmt = update(cls.model).where(cls.model.id == id).values(**data).returning(cls.model)
+            result = await session.execute(stmt)
+            await session.commit()
+            return result.scalar()

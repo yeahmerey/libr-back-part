@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from typing import Optional
 from pydantic import BaseModel
 
 
@@ -11,7 +11,7 @@ class SPostResponse(SPost):
 
     id: int
     user_id: int
-    image_url: str
+    image_url: Optional[str] = None
     created_at: datetime
 
     class Config:
