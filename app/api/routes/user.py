@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import select
+from app.db.db_config import async_session_maker
 
 from app.api.dependenies import get_current_user
+from app.db.models.content import Content
+from app.db.models.review import Review
 from app.db.models.user import User
 from app.schemas.post import SPostResponse
 from app.schemas.user import SUserPublic, SUser
@@ -47,3 +51,24 @@ async def get_liked_posts(user: User = Depends(get_current_user)):
 async def update_user(updated_user: SUser ,user: User = Depends(get_current_user)):
     await UserService.update(user_id=user.id , updated_user=updated_user)
     return await UserDAO.find_one_or_none(id=user.id)
+
+@router.get("/{user_id}/reviews")
+async def get_user_reviews(user_id: int):
+    async with async_session_maker() as session:
+        result = await session.execute(
+            select(Review, Content.name, Content.type)
+            .join(Content, Review.content_id == Content.id)
+            .where(Review.user_id == user_id)
+            .order_by(Review.created_at.desc())
+        )
+        return [
+            {
+                "content_id": review.content_id,
+                "content_name": name,
+                "content_type": type,
+                "rating": review.rating,
+                "comment": review.comment,
+                "created_at": review.created_at.isoformat()
+            }
+            for review, name, type in result
+        ]
