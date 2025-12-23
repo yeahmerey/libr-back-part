@@ -3,10 +3,13 @@ import uuid
 import aiofiles
 
 from fastapi import UploadFile, HTTPException
+from sqlalchemy import select
 
+from app.db.models.follow import Follow
+from app.db.models.user import User
 from app.db.repositories.user import UserDAO
 from app.schemas.user import SUserPublic, SUser
-
+from app.db.db_config import async_session_maker
 
 class UserService:
 
@@ -54,3 +57,31 @@ class UserService:
         # 🔥 Сохраняем ОТНОСИТЕЛЬНЫЙ путь для фронтенда
         image_url = f"/static/images/{unique_name}"
         return await UserDAO.add_user_image(image_url=image_url, user_id=user_id)
+    
+    @classmethod
+    async def search_users_with_follow_status(cls, query: str, current_user_id: int = None):
+        async with async_session_maker() as session:
+            # Основной запрос: пользователи
+            users_query = select(User).where(User.username.ilike(f"%{query}%"))
+            users_result = await session.execute(users_query)
+            users = users_result.scalars().all()
+
+            if not current_user_id:
+                return [{"user": u, "is_following": False} for u in users]
+
+            # Получаем ID тех, на кого подписан current_user
+            following_subq = (
+                select(Follow.following_id)
+                .where(Follow.follower_id == current_user_id)
+                .subquery()
+            )
+            following_ids_query = select(following_subq.c.following_id)
+            following_ids = set(await session.scalars(following_ids_query).all())
+
+            return [
+                {
+                    "user": u,
+                    "is_following": u.id in following_ids
+                }
+                for u in users
+            ]
