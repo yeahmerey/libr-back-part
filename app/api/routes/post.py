@@ -1,7 +1,9 @@
 from typing import Union
 
 from fastapi import APIRouter, Depends, Query, UploadFile, File, Form
-
+from sqlalchemy import select
+from app.db.db_config import async_session_maker
+from app.db.models.post import Post
 from app.schemas.comment import SComment, SCommentResponse
 from app.services.post import PostServices
 from app.api.routes.user import get_current_user
@@ -13,10 +15,14 @@ router = APIRouter(
     tags=["Posts"]
 )
 
-@router.get("", response_model=list[SPostResponse])
+@router.get("")
 async def get_posts():
-    return await PostServices.get_all_posts()
-
+    async with async_session_maker() as session:
+        result = await session.execute(
+            select(Post).order_by(Post.created_at.desc())  # ← должно быть
+        )
+        return result.scalars().all()
+    
 @router.post("", response_model=SPostResponse)
 async def create_post(content: str = Form(...), file: Union[UploadFile, str] = File(None), user: User = Depends(get_current_user)):
     from app.schemas.post import SPost
